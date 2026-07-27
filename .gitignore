@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+__MACOSX/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# IDEs
+.vscode/
+.idea/
+
+# LaTeX build artifacts (if you ever keep the report here)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
