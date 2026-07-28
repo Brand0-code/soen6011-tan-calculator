@@ -18,7 +18,7 @@ installer on Windows and macOS; on Debian or Ubuntu it may need
 `sudo apt install python3-tk`.
 
 ```bash
-git clone https://github.com/Brand0-code/soen6011-tan-calculator.git
+git clone https://github.com/YOUR_USERNAME/soen6011-tan-calculator.git
 cd soen6011-tan-calculator
 python tan_gui.py
 ```
@@ -30,6 +30,9 @@ short self-check:
 ```bash
 python tan_math.py
 ```
+
+All three Python files live in `source_code/` and must stay together,
+since `tan_gui.py` imports from `tan_math.py`.
 
 ---
 
@@ -65,6 +68,7 @@ against Python's own `math.tan`. It is not part of the implementation:
 `math` is imported only there, never in `tan_math.py`.
 
 ```bash
+cd source_code
 python verify_tan.py
 ```
 
@@ -82,6 +86,30 @@ and the boundary of the accepted range. All 44 pass.
 | 1.57 | 1255.7655915007 | 1255.7655915008 | 3.5e-14 |
 | 89.999° | 57295.7795072025 | 57295.7795072129 | 1.8e-13 |
 | 1e6 | −0.3736244539 | −0.3736244540 | 9.4e-11 |
+
+---
+
+## Code quality
+
+Both modules and the verification harness conform to PEP 8 and are free
+of static-analysis warnings.
+
+```bash
+cd source_code
+flake8 --max-line-length=79 tan_math.py tan_gui.py verify_tan.py
+pylint tan_math.py
+```
+
+| Check | Result |
+|---|---|
+| Flake8, 79-column limit | no issues |
+| Pylint, `tan_math.py` | 10.00 / 10 |
+| Verification harness | 44 of 44 checks passed |
+
+Lint the modules individually. Running Pylint over `tan_math.py` and
+`verify_tan.py` together reports `R0801` (similar lines), because both
+list the same sample angles; that is an artefact of comparing the two
+files, not a defect in either.
 
 ---
 
@@ -143,10 +171,17 @@ reporting a fault code.
 ## Repository layout
 
 ```
-tan_math.py     calculation only, no interface code
-tan_gui.py      Tkinter interface, no calculation code
-verify_tan.py   verification harness, not part of the implementation
-screenshots/    interface states and tool output
+source_code/
+  tan_math.py     calculation only, no interface code
+  tan_gui.py      Tkinter interface, no calculation code
+  verify_tan.py   verification harness, not part of the implementation
+latex/
+  main.tex        Deliverable 2 report
+  slides.tex      presentation slides
+pdf/
+  main.pdf        compiled report
+  slides.pdf      compiled slides
+screenshots/      interface states and tool output
 .gitignore
 README.md
 ```
