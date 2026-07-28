@@ -18,7 +18,7 @@ installer on Windows and macOS; on Debian or Ubuntu it may need
 `sudo apt install python3-tk`.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/soen6011-tan-calculator.git
+git clone https://github.com/Brand0-code/soen6011-tan-calculator.git
 cd soen6011-tan-calculator
 python tan_gui.py
 ```
