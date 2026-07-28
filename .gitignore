@@ -13,9 +13,17 @@ venv/
 .vscode/
 .idea/
 
-# LaTeX build artifacts (if you ever keep the report here)
+# LaTeX build artefacts
 *.aux
 *.log
 *.out
 *.toc
+*.nav
+*.snm
+*.vrb
 *.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# Personal preparation notes, not part of the deliverable
+DEMO_PREP.md
