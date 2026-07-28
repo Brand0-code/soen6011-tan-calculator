@@ -1,0 +1,833 @@
+% =====================================================================
+% SOEN 6011 -- Software Engineering Processes -- Summer 2026
+% Deliverable 2 -- F2: tan(x)
+% Konan Brandon -- 40373534
+%
+% Compile:  pdflatex main.tex   (twice, for the table of contents)
+%
+% Expects the screenshots in ../screenshots/ relative to this file.
+% =====================================================================
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{booktabs}
+
+\graphicspath{{../screenshots/}{screenshots/}{./}}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=black
+}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  showstringspaces=false,
+  columns=flexible
+}
+
+\title{\textbf{F2: tan(x)}\\[0.3cm]
+       \large SOEN 6011 --- Software Engineering Processes\\
+       Deliverable 2}
+\author{Konan Brandon\\Student ID: 40373534}
+\date{Summer 2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Introduction}
+
+This deliverable reimplements the tangent function from first
+principles, replaces the textual interface of Deliverable~1 with a
+graphical one, places the source under public version control, and
+revises the requirements in light of what the implementation
+uncovered.
+
+The repository is published at:
+
+\begin{center}
+\url{https://github.com/Brand0-code/soen6011-tan-calculator}
+\end{center}
+
+Generative artificial intelligence was used throughout, as required by
+the project constraints. Each problem below records the tool, the
+prompt type, the prompt itself structured according to the CASTROFF
+framework, and an assessment of the output including the points at
+which it was corrected.
+
+% =====================================================================
+\newpage
+\section{Problem 5: Implementation from Scratch}
+
+\subsection{Interpretation of ``from scratch''}
+
+The specification permits functions related to input, output,
+arithmetic and user interface design, and prohibits every other
+built-in or library function. The implementation therefore does not
+import \texttt{math}. The constant $\pi$ is a literal, and the sine and
+cosine are computed from their Maclaurin series. The built-ins that
+remain are \texttt{float} and \texttt{int} for conversion,
+\texttt{abs} for arithmetic, \texttt{isinstance} for validating the
+type of the input, and \texttt{print} for output.
+
+Meeting this constraint required identifying and implementing the
+functions subordinate to the tangent, listed in
+Table~\ref{tab:subordinate}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{9cm}|}
+\hline
+\textbf{Function} & \textbf{Role} \\
+\hline
+\texttt{validate\_number} & Rejects non-numeric values, infinities,
+NaN and out-of-range magnitudes. \\
+\hline
+\texttt{degrees\_to\_radians} & Multiplies by $\pi/180$, replacing
+\texttt{math.radians}. \\
+\hline
+\texttt{\_nearest\_integer} & Rounds to the nearest whole number,
+since \texttt{int} truncates towards zero. \\
+\hline
+\texttt{reduce\_range} & Subtracts the nearest whole multiple of
+$\pi$. \\
+\hline
+\texttt{sine}, \texttt{cosine} & Maclaurin series with an incremental
+term recurrence. \\
+\hline
+\texttt{compute\_tan} & Validates, reduces, checks for an asymptote,
+and divides. \\
+\hline
+\end{tabular}
+\caption{Functions subordinate to $\tan(x)$.}
+\label{tab:subordinate}
+\end{table}
+
+\subsection{Series evaluation without factorials}
+
+The Maclaurin expansion of the sine is
+\[
+\sin(x) = x - \frac{x^{3}}{3!} + \frac{x^{5}}{5!} - \cdots
+\]
+Evaluating each term independently would require a factorial and a
+power, both of which grow rapidly. Dividing one term by its
+predecessor gives
+\[
+\frac{x^{5}/5!}{x^{3}/3!} = \frac{x^{2}}{4 \cdot 5},
+\]
+so in general each term is obtained from the previous one by
+multiplying by $-x^{2}/\big((2k)(2k+1)\big)$. The cosine uses the same
+recurrence with $-x^{2}/\big((2k-1)(2k)\big)$. One multiplication and
+one division per term replace the factorial entirely, nothing
+overflows, and the loop terminates when a term falls below $10^{-15}$
+rather than after a fixed count.
+
+\subsection{Range reduction}
+
+The tangent has period $\pi$, not $2\pi$, because the sine and cosine
+both change sign and the signs cancel in the ratio. Subtracting the
+nearest whole multiple of $\pi$ therefore leaves the result unchanged
+while confining the argument to $[-\pi/2, \pi/2]$, where the series
+converges quickly. Without this step an input such as $x = 1000$ would
+be unusable. Reduction also collapses every asymptote onto a single
+check at $\pm\pi/2$.
+
+\subsection{Exception handling}
+
+Two exception classes are defined, both derived from
+\texttt{TanCalculatorError} so that the interface can catch either
+with a single handler:
+
+\begin{itemize}
+  \item \texttt{UndefinedTangentError} --- the angle lies on an
+        asymptote.
+  \item \texttt{InvalidInputError} --- the value is non-numeric,
+        infinite, NaN, or beyond the validated range.
+\end{itemize}
+
+Messages state what went wrong and what to enter instead, rather than
+reporting a fault code.
+
+\subsection{Graphical user interface}
+
+The interface is built with Tkinter and resides in \texttt{tan\_gui.py},
+which performs no arithmetic of its own. It offers an entry field,
+mutually exclusive radian and degree selection, a Calculate control
+bound to both a button and the Return key, a Clear control bound to a
+button and the Escape key, and a result area. Errors appear as plain
+sentences; a stack trace is never shown. Every control carries a
+visible text label, focus starts in the entry field, and the outcome
+is stated in words as well as indicated by colour, so the interface
+does not depend on colour perception.
+
+The program runs with \texttt{python tan\_gui.py} from a terminal, with
+no development environment and no build step.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{gui_01_success.png}
+\hfill
+\includegraphics[width=0.45\textwidth]{gui_02_asymptote_error.png}
+\caption{A successful calculation, and an angle on an asymptote
+reported in plain language.}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\textwidth]{gui_03_invalid_input.png}
+\hfill
+\includegraphics[width=0.45\textwidth]{gui_04_magnitude_guard.png}
+\caption{Non-numeric input rejected with guidance, and an angle beyond
+the validated range refused with an explanation.}
+\end{figure}
+
+\subsection{Verification}
+
+The repository includes \texttt{verify\_tan.py}, a harness that
+compares the implementation against Python's \texttt{math.tan}. The
+harness is not part of the implementation: \texttt{math} is imported
+only there. It runs forty-four checks across reference angles, degree
+conversion, range reduction, near-asymptote behaviour, undefined
+points, rejected input, and the boundary of the accepted range. All
+forty-four pass.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Angle (rad)} & \textbf{This program} & \textbf{\texttt{math.tan}}
+& \textbf{Rel. diff.} \\
+\midrule
+$\pi/4$   & 1.0000000000     & 1.0000000000     & $1.1\times10^{-16}$ \\
+1.0       & 1.5574077247     & 1.5574077247     & $1.4\times10^{-16}$ \\
+2.0       & $-2.1850398633$  & $-2.1850398633$  & $2.0\times10^{-16}$ \\
+1000.0    & 1.4703241557     & 1.4703241557     & $3.8\times10^{-14}$ \\
+12345.678 & $-0.9914971407$  & $-0.9914971407$  & $1.5\times10^{-12}$ \\
+1.57      & 1255.7655915007  & 1255.7655915008  & $3.5\times10^{-14}$ \\
+$10^{6}$  & $-0.3736244539$  & $-0.3736244540$  & $9.4\times10^{-11}$ \\
+\bottomrule
+\end{tabular}
+\caption{Selected verification results.}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{verification_output_2.png}
+\caption{Verification harness: forty-four of forty-four checks
+passed.}
+\end{figure}
+
+\subsection{A defect found by testing, and the validated range}
+
+Comparing large arguments against the reference revealed a defect that
+inspection alone would not have caught. For $x = 10^{15}$ the program
+returned $-1.557$ where the true value is $-1.672$: wrong in the first
+decimal place, with no error raised.
+
+The cause lies in range reduction. Finding the multiple of $\pi$ to
+subtract requires computing $x/\pi$, and the error in the product
+$k\pi$ grows with $k$. Sampling four thousand angles at each order of
+magnitude gives Table~\ref{tab:accuracy}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrr}
+\toprule
+\textbf{Magnitude} & \textbf{Typical correct digits} &
+\textbf{Worst observed} \\
+\midrule
+$10^{2}$ & 13.6 & 10.8 \\
+$10^{3}$ & 12.7 & 10.1 \\
+$10^{4}$ & 11.7 & 8.8 \\
+$10^{5}$ & 10.7 & 8.5 \\
+$10^{6}$ & 9.7 & 6.8 \\
+$10^{7}$ & 8.7 & 6.2 \\
+$10^{8}$ & 7.7 & 5.1 \\
+\bottomrule
+\end{tabular}
+\caption{Correct significant digits against \texttt{math.tan}.}
+\label{tab:accuracy}
+\end{table}
+
+Results are displayed to ten decimal places. At $10^{6}$ the worst
+case still holds about seven correct digits; past that it falls below
+six, and the figures on screen would increasingly be noise presented
+as precision. The validated range is therefore $\pm 10^{6}$, and
+angles beyond it are refused with an explanation rather than answered.
+Production libraries solve this with Payne--Hanek reduction
+\cite{muller}, which is beyond the scope of this deliverable.
+
+Every exact asymptote within the accepted range --- 636{,}620 of them,
+counting both signs --- was tested and correctly raised
+\texttt{UndefinedTangentError}.
+
+\subsection{Conformance to style}
+
+Both modules and the harness pass Flake8 with a 79-column limit and
+report no issues, and \texttt{tan\_math.py} is rated 10.00 out of 10 by
+Pylint. Although style tools are a Deliverable~3 requirement, they were
+applied here so that later work begins from a clean baseline.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{flake8_clean.png}\\[0.4cm]
+\includegraphics[width=0.85\textwidth]{pylint_score.png}
+\caption{Flake8 reports no issues; Pylint rates the module 10.00/10.}
+\end{figure}
+
+\subsection{Use of generative artificial intelligence}
+
+\textbf{Tool:} Claude (Anthropic).
+
+\medskip
+\noindent\textbf{Prompt type:} role prompting, zero-shot.
+
+\medskip
+\noindent\textbf{Prompt, structured by CASTROFF:}
+
+\begin{itemize}
+  \item \textbf{Constraints:} no \texttt{math} module, no built-in
+        factorial, no built-in trigonometry; own $\pi$ constant;
+        reduction by the period $\pi$; tolerance-based termination;
+        custom exceptions; must run without an IDE.
+  \item \textbf{Audience:} a grader checking the from-scratch
+        constraint; the end user is a beginner-level civil engineering
+        student.
+  \item \textbf{Structure:} a single module with separate helper
+        functions.
+  \item \textbf{Tone:} clean, well-commented, readable by a beginner.
+  \item \textbf{Role:} a Python developer implementing strictly to a
+        specification.
+  \item \textbf{Output format:} complete runnable code with an
+        explanation of each function.
+  \item \textbf{Focus:} correctness against a reference across
+        ordinary, near-asymptote and large inputs.
+  \item \textbf{Function:} to satisfy D2/Problem~5.
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{gai_p5_01_build_prompt.png}
+\caption{Specification prompt and the generated module.}
+\end{figure}
+
+\noindent\textbf{Explanation of the output.} The response supplied a
+complete module and a rationale for each function. The structure and
+the term recurrence were adopted. The output was then audited rather
+than accepted:
+
+\begin{enumerate}
+  \item The loop construct was challenged against the restriction on
+        built-in functions. The response confirmed compliance and
+        enumerated every built-in the module uses, which served as a
+        compliance checklist (Figure~\ref{fig:compliance}).
+  \item Verification against the reference exposed the large-argument
+        defect described above, which the generated code neither
+        prevented nor flagged. Independent review confirmed both the
+        defect and its cause (Figure~\ref{fig:defect}).
+  \item An initial limit of $10^{10}$ was proposed. Measuring the
+        surviving digits showed this to be too permissive, and the
+        limit was tightened to $10^{6}$. The decision, and the
+        measurement supporting it, are mine rather than the tool's.
+\end{enumerate}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{gai_p5_02_compliance_check.png}
+\caption{Auditing the generated loops against the built-in
+restriction.}
+\label{fig:compliance}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{gai_p5_04_defect_confirmation.png}
+\caption{Independent confirmation of the large-argument defect.}
+\label{fig:defect}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{gai_p5_03_gui_prompt.png}
+\caption{Specification prompt for the Tkinter interface.}
+\end{figure}
+
+\noindent A separate prompt produced the interface. That version
+called \texttt{compute\_tan} with two arguments, whereas the module
+defines one, so every calculation would have raised
+\texttt{TypeError}. The fault was found by testing the two modules
+together rather than by reading either in isolation, and the interface
+was corrected before use. A final review of the submitted module
+confirmed compliance and the exhaustive asymptote result
+(Figure~\ref{fig:final}).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{gai_p5_05_final_review.png}
+\caption{Final compliance and accuracy review of the submitted
+module.}
+\label{fig:final}
+\end{figure}
+
+% =====================================================================
+\newpage
+\section{Problem 6: Version Control}
+
+\subsection{Repository}
+
+The source is held in Git and published publicly on GitHub at
+\url{https://github.com/Brand0-code/soen6011-tan-calculator}.
+The release corresponding to this deliverable is tagged
+\texttt{v1.0.0}, following Semantic Versioning.
+
+\subsection{Commit history}
+
+Commits were made incrementally as the work progressed rather than as
+a single deposit. Messages use the imperative mood, and the body
+explains why the change was made:
+
+\begin{lstlisting}
+Add from-scratch tangent module using Maclaurin series
+
+Compute tan(x) as sin(x)/cos(x) without importing math. PI is a
+literal constant and each series term is derived from the previous
+one, which removes the need for a factorial and prevents overflow.
+\end{lstlisting}
+
+\begin{lstlisting}
+Add verification harness comparing output against math.tan
+
+Checks reference angles, degree conversion, range reduction,
+behaviour near asymptotes, undefined points, rejected input, and the
+boundary of the accepted range. The math import is confined to this
+harness and is absent from the implementation.
+\end{lstlisting}
+
+\subsection{Repository contents}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{9cm}|}
+\hline
+\texttt{tan\_math.py} & Calculation only; no interface code. \\
+\hline
+\texttt{tan\_gui.py} & Tkinter interface; no calculation code. \\
+\hline
+\texttt{verify\_tan.py} & Verification harness; not part of the
+implementation. \\
+\hline
+\texttt{README.md} & Purpose, usage, verification, accuracy,
+validated range, error handling, versioning. \\
+\hline
+\texttt{screenshots/} & Interface states and tool output. \\
+\hline
+\texttt{.gitignore} & Excludes interpreter and platform artefacts. \\
+\hline
+\end{tabular}
+\caption{Repository layout.}
+\end{table}
+
+\subsection{Use of generative artificial intelligence}
+
+\textbf{Tool:} Claude. \quad \textbf{Prompt type:} few-shot ---
+existing commit messages were supplied as examples to be improved.
+
+\medskip
+\noindent The prompt asked for a README covering purpose, usage
+without an IDE, features and measured accuracy, and for existing
+commit messages to be rewritten in the imperative mood with the
+reason for each change stated. The generated README was adopted after
+the accuracy figures were replaced with measured values, since the
+draft reproduced an earlier and more conservative estimate that
+contradicted the module documentation. Reconciling the two was
+necessary before submission.
+
+% =====================================================================
+\newpage
+\section{Problem 7: Updated Requirements}
+
+\subsection{Rationale for the Revised Identifier Scheme}
+
+The requirements in D1/Problem~2 used a single flat sequence
+(REQ-001 to REQ-008) that mixed functional statements with quality
+attributes: REQ-001 (compute the tangent) and REQ-007 (numerical
+precision) belong to different classes of requirement yet shared one
+numbering space. ISO/IEC/IEEE 29148 distinguishes functional
+requirements from quality and interface requirements, and expects
+identifiers to be stable so that a requirement can be traced and
+versioned independently of its neighbours.
+
+The revised scheme separates requirements into four categories, each
+with its own sequence:
+
+\begin{itemize}
+  \item \textbf{TAN-FR-\textit{nn}} --- functional requirements:
+        what the software computes.
+  \item \textbf{TAN-UI-\textit{nn}} --- user interface requirements:
+        how the user supplies input and receives output.
+  \item \textbf{TAN-NFR-\textit{nn}} --- non-functional requirements:
+        quality attributes such as precision, performance, usability
+        and accessibility.
+  \item \textbf{TAN-CON-\textit{nn}} --- constraints: restrictions
+        imposed on the solution rather than on its behaviour.
+\end{itemize}
+
+Identifiers are not reused. Where a D1 requirement was retained, its
+origin is recorded so that the earlier document remains traceable.
+
+\subsection{Functional Requirements}
+
+\begin{longtable}{|p{2.3cm}|p{7.4cm}|p{4.3cm}|}
+\hline
+\textbf{ID} & \textbf{Requirement} & \textbf{Source / Rationale} \\
+\hline
+\endhead
+
+TAN-FR-01 & The software shall compute $\tan(x)$ for any real-valued
+angle $x$ within the validated input range. & D1/REQ-001. Priya's
+primary goal: slope calculations. \\
+\hline
+
+TAN-FR-02 & The software shall compute $\tan(x)$ using only arithmetic
+operators and functions defined within the software itself, without
+calling any library routine that performs part of the calculation. &
+D2/Problem~5 ``from scratch'' constraint. \\
+\hline
+
+TAN-FR-03 & The software shall evaluate $\tan(x)$ as
+$\sin(x)/\cos(x)$, with $\sin$ and $\cos$ obtained from their
+Maclaurin series. & Design decision recorded in D1/Problem~4. \\
+\hline
+
+TAN-FR-04 & The software shall reduce the input angle by the nearest
+whole multiple of $\pi$ before evaluating the series. & Required for
+accuracy; the tangent has period $\pi$. \\
+\hline
+
+TAN-FR-05 & The software shall generate each series term from its
+predecessor by multiplication and division, without computing a
+factorial. & Avoids overflow and satisfies TAN-FR-02. \\
+\hline
+
+TAN-FR-06 & The software shall stop summing a series when the
+magnitude of the current term falls below $10^{-15}$, rather than
+after a fixed number of terms. & Accuracy-driven termination;
+replaces the fixed term count used in D1. \\
+\hline
+
+TAN-FR-07 & The software shall report that $\tan(x)$ is undefined,
+rather than returning a numeric value, when the reduced angle lies
+within $10^{-10}$ of an odd multiple of $\pi/2$. & D1/REQ-002,
+modified: the check now follows range reduction. Priya's frustration
+with silently wrong results near $90^{\circ}$. \\
+\hline
+
+TAN-FR-08 & The software shall accept an angle expressed in either
+radians or degrees, with radians as the default. & D1/REQ-005,
+modified: the unit is now selected explicitly rather than inferred. \\
+\hline
+
+TAN-FR-09 & The software shall convert an angle given in degrees to
+radians internally before computing the tangent. & D1/REQ-006,
+unchanged. Priya's degrees/radians confusion. \\
+\hline
+
+TAN-FR-10 & The software shall reject input that is not a finite real
+number, including infinity and NaN. & D2/Problem~5; not covered in
+D1. \\
+\hline
+
+TAN-FR-11 & The software shall reject any angle whose magnitude
+exceeds $10^{6}$ radians. & Added after verification revealed that
+range reduction becomes unreliable beyond this magnitude
+(see D2/Problem~5). \\
+\hline
+
+TAN-FR-12 & The software shall reject input that cannot be
+interpreted as a number, including empty input. & Implicit in D1;
+made explicit following implementation. \\
+\hline
+\end{longtable}
+
+\subsection{User Interface Requirements}
+
+\begin{longtable}{|p{2.3cm}|p{7.4cm}|p{4.3cm}|}
+\hline
+\textbf{ID} & \textbf{Requirement} & \textbf{Source / Rationale} \\
+\hline
+\endhead
+
+TAN-UI-01 & The software shall provide a graphical user interface
+built with Tkinter. & D1/REQ-004, modified: supersedes the textual
+interface required in D1. \\
+\hline
+
+TAN-UI-02 & The interface shall provide a single-line entry field for
+the angle, labelled with visible text. & Priya is not a programmer;
+the purpose of each control must be evident. \\
+\hline
+
+TAN-UI-03 & The interface shall provide a mutually exclusive choice
+between radians and degrees, with radians selected on start. &
+Supports TAN-FR-08; prevents the unit being left unspecified. \\
+\hline
+
+TAN-UI-04 & The interface shall provide a control that starts the
+calculation, activated either by a button or by the Return key. &
+Keyboard operation for repeated calculations. \\
+\hline
+
+TAN-UI-05 & The interface shall provide a control that clears the
+entry field and the result, activated either by a button or by the
+Escape key. & Allows the user to recover from a mistake. \\
+\hline
+
+TAN-UI-06 & The interface shall display the result in a dedicated,
+consistently positioned area. & Predictable location reduces
+searching. \\
+\hline
+
+TAN-UI-07 & The interface shall report every error as a plain
+sentence within the window, and shall never display a stack trace. &
+D1/REQ-003, extended to the graphical interface. \\
+\hline
+
+TAN-UI-08 & The interface shall place keyboard focus in the entry
+field when the program starts. & The user can type immediately
+without clicking. \\
+\hline
+\end{longtable}
+
+\subsection{Non-Functional Requirements}
+
+\begin{longtable}{|p{2.3cm}|p{7.4cm}|p{4.3cm}|}
+\hline
+\textbf{ID} & \textbf{Requirement} & \textbf{Source / Rationale} \\
+\hline
+\endhead
+
+TAN-NFR-01 & All messages presented to the user shall use plain,
+non-technical language and shall state what to do next. &
+D1/REQ-003, unchanged. Priya's discomfort with cryptic messages. \\
+\hline
+
+TAN-NFR-02 & The software shall display results to ten decimal
+places. & D1/REQ-007, modified: raised from six, since verification
+showed at least that many digits are reliable within the accepted
+range. \\
+\hline
+
+TAN-NFR-03 & Within the validated input range, results shall agree
+with an independent reference implementation to at least six
+significant digits. & Added: makes the accuracy claim verifiable
+rather than assumed. \\
+\hline
+
+TAN-NFR-04 & The software shall complete a single calculation and
+display the result within one second. & D1/REQ-008, unchanged.
+Priya's deadline-driven context. \\
+\hline
+
+TAN-NFR-05 & Every control shall carry a visible text label, shall be
+reachable from the keyboard, and no outcome shall be conveyed by
+colour alone. & Added: accessibility, anticipating D3. \\
+\hline
+
+TAN-NFR-06 & Calculation logic and interface logic shall reside in
+separate modules, with no arithmetic in the interface module. &
+Added: allows the calculation to be tested without a window on
+screen. \\
+\hline
+\end{longtable}
+
+\subsection{Constraints}
+
+\begin{longtable}{|p{2.3cm}|p{7.4cm}|p{4.3cm}|}
+\hline
+\textbf{ID} & \textbf{Constraint} & \textbf{Source / Rationale} \\
+\hline
+\endhead
+
+TAN-CON-01 & The software shall execute from a command line using a
+standard Python interpreter, without requiring an integrated
+development environment or a build step. & D2/Problem~5. \\
+\hline
+
+TAN-CON-02 & All error conditions shall be signalled through
+dedicated exception classes derived from a single base class. &
+D2/Problem~5; allows one handler to catch every calculator error. \\
+\hline
+
+TAN-CON-03 & The source code shall conform to PEP 8. & Anticipates
+D3/Problem~7; already satisfied. \\
+\hline
+\end{longtable}
+
+\subsection{Change Log Relative to D1}
+
+\begin{longtable}{|p{2.6cm}|p{2.6cm}|p{8.6cm}|}
+\hline
+\textbf{D1 ID} & \textbf{Status} & \textbf{Disposition} \\
+\hline
+\endhead
+
+REQ-001 & Unchanged & Becomes TAN-FR-01. Scope now bounded by the
+validated input range. \\
+\hline
+REQ-002 & Modified & Becomes TAN-FR-07. The tolerance is now a
+concrete value ($10^{-10}$) and the check is applied after range
+reduction, so a single test covers every asymptote. \\
+\hline
+REQ-003 & Unchanged & Split into TAN-NFR-01 (language) and TAN-UI-07
+(no stack traces), since one concerns wording and the other the
+interface. \\
+\hline
+REQ-004 & Modified & Becomes TAN-UI-01. The textual interface is
+replaced by a Tkinter interface, as required by D2/Problem~5. \\
+\hline
+REQ-005 & Modified & Becomes TAN-FR-08. The unit is now selected
+explicitly rather than assumed, removing the ambiguity noted in D1. \\
+\hline
+REQ-006 & Unchanged & Becomes TAN-FR-09. \\
+\hline
+REQ-007 & Modified & Becomes TAN-NFR-02. Precision raised from six
+decimal places to ten, supported by measurement. \\
+\hline
+REQ-008 & Unchanged & Becomes TAN-NFR-04. \\
+\hline
+--- & Added & TAN-FR-02, TAN-FR-03, TAN-FR-04, TAN-FR-05, TAN-FR-06,
+TAN-FR-10, TAN-FR-11, TAN-FR-12, TAN-UI-02 to TAN-UI-06, TAN-UI-08,
+TAN-NFR-03, TAN-NFR-05, TAN-NFR-06, TAN-CON-01, TAN-CON-02,
+TAN-CON-03. \\
+\hline
+--- & Removed & None. No D1 requirement was withdrawn; REQ-004 was
+superseded rather than deleted. \\
+\hline
+\end{longtable}
+
+\noindent
+Eight D1 requirements become twenty-nine, of which four are unchanged,
+four are modified, and twenty-one are new. Most additions arise
+directly from implementing the function from scratch: the prohibition
+on library routines (TAN-FR-02) implies decisions about series
+evaluation, range reduction and termination that were left unstated
+in D1, and each of those decisions carries its own verifiable
+requirement.
+
+\subsection{Assumptions}
+
+\begin{itemize}
+  \item ``Real-valued'' excludes complex numbers, which remain out of
+        scope.
+  \item The validated input range ($\pm 10^{6}$ radians) is a
+        property of this implementation, not of the tangent function.
+        It follows from double-precision arithmetic and the range
+        reduction method chosen.
+  \item The reference implementation named in TAN-NFR-03 is Python's
+        \texttt{math.tan}. It is used only for verification and is
+        never called by the software itself.
+  \item The one-second limit in TAN-NFR-04 assumes ordinary desktop
+        hardware and excludes interpreter start-up.
+  \item Accessibility in TAN-NFR-05 is addressed at the level of
+        labelling, keyboard operation and non-reliance on colour.
+        Screen-reader conformance is not claimed.
+\end{itemize}
+
+\subsection{Use of generative artificial intelligence}
+
+\textbf{Tool:} Claude. \quad \textbf{Prompt type:} chain-of-thought
+--- the model was asked to reason about the category, atomicity and
+verifiability of each requirement before restating it.
+
+\medskip
+\noindent The prompt supplied the eight requirements from
+Deliverable~1 together with the feedback that the identifier scheme
+mixed functional and non-functional requirements, and asked for a
+categorised scheme conforming to ISO/IEC/IEEE 29148 with every
+requirement traced to the persona or to a constraint arising from
+Problem~5. The output was revised in two respects: REQ-003 was split,
+because plain language is a quality attribute while the absence of a
+stack trace is an interface behaviour, and the wording of the
+accuracy requirement was tightened so that it names a verifiable
+reference rather than asserting precision in the abstract.
+
+% =====================================================================
+\newpage
+\section{Conclusion}
+
+The tangent is now computed entirely from first principles, presented
+through a graphical interface, held under public version control, and
+described by a requirements set that reflects what the implementation
+actually does.
+
+The most instructive part of the work was not writing the series but
+measuring it. Comparing the implementation against an independent
+reference exposed a defect that reading the code would not have
+revealed, and choosing where to draw the validated range required
+measurement rather than judgement alone. The same applies to the
+integration fault between the two modules: each file was correct in
+isolation and wrong together.
+
+\begin{thebibliography}{9}
+
+\bibitem{iso29148}
+ISO/IEC/IEEE, \emph{ISO/IEC/IEEE 29148:2018 --- Systems and software
+engineering --- Life cycle processes --- Requirements engineering},
+International Organization for Standardization, 2018.
+
+\bibitem{pep8}
+G. van Rossum, B. Warsaw, and A. Coghlan, ``PEP 8 --- Style Guide for
+Python Code,'' Python Software Foundation, 2001. [Online]. Available:
+\url{https://peps.python.org/pep-0008/}
+
+\bibitem{pep257}
+D. Goodger and G. van Rossum, ``PEP 257 --- Docstring Conventions,''
+Python Software Foundation, 2001. [Online]. Available:
+\url{https://peps.python.org/pep-0257/}
+
+\bibitem{abramowitz}
+M. Abramowitz and I. A. Stegun, \emph{Handbook of Mathematical
+Functions with Formulas, Graphs, and Mathematical Tables}. New York,
+NY, USA: Dover, 1965.
+
+\bibitem{muller}
+J.-M. Muller, \emph{Elementary Functions: Algorithms and
+Implementation}, 3rd ed. Boston, MA, USA: Birkh\"{a}user, 2016.
+
+\bibitem{goldberg}
+D. Goldberg, ``What every computer scientist should know about
+floating-point arithmetic,'' \emph{ACM Computing Surveys}, vol. 23,
+no. 1, pp. 5--48, Mar. 1991.
+
+\bibitem{tkinter}
+Python Software Foundation, ``tkinter --- Python interface to Tcl/Tk.''
+[Online]. Available: \url{https://docs.python.org/3/library/tkinter.html}
+
+\bibitem{semver}
+T. Preston-Werner, ``Semantic Versioning 2.0.0.'' [Online].
+Available: \url{https://semver.org/}
+
+\bibitem{claude}
+Anthropic, ``Claude,'' large language model, 2026. [Online].
+Available: \url{https://claude.ai/}
+
+\end{thebibliography}
+
+\end{document}
