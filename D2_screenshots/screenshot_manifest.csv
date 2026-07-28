@@ -1,0 +1,15 @@
+figure,filename,category,problem,caption,evidences,prompt_type,status
+1,gai_p5_01_build_prompt.png,GAI,P5,Initial specification prompt and generated tan_math.py,Prompt engineering against a written specification,"Role prompting, zero-shot",done
+2,gai_p5_02_compliance_check.png,GAI,P5,Auditing generated loops against the built-in restriction,Review of output against course constraints,Verification / constraint-checking,done
+3,gai_p5_03_gui_prompt.png,GAI,P5,Specification prompt for the Tkinter interface,Separation of interface from calculation,"Role prompting, zero-shot",done
+4,gai_p5_04_defect_confirmation.png,GAI,P5,Independent confirmation of the large-input precision defect,Defect found by testing and confirmed by review,Verification with source supplied,done
+5,gai_p5_05_final_review.png,GAI,P5,Final compliance and accuracy review of the submitted module,Exhaustive asymptote testing and boundary behaviour,Verification with final source supplied,done
+6,gui_01_success.png,Interface,P5,Successful calculation: 45 degrees returns 1.0000000000,Correct result and degree conversion,,done
+7,gui_02_asymptote_error.png,Interface,P5,Undefined tangent at 90 degrees reported in plain language,UndefinedTangentError surfaced without a traceback,,done
+8,gui_03_invalid_input.png,Interface,P5,Non-numeric entry rejected with guidance,Input validation at the interface layer,,done
+9,gui_04_magnitude_guard.png,Interface,P5,Angle beyond the validated range rejected with an explanation,Documented precision limit enforced at run time,,done
+10,verification_output_1.png,Tool output,P5,Verification harness output part 1 of 2,Reference angles degrees periodicity and near-asymptote checks,,done
+11,verification_output_2.png,Tool output,P5,Verification harness output part 2 of 2: 44 of 44 checks passed,Undefined points rejected input and boundary checks,,done
+12,flake8_clean.png,Tool output,P5,Flake8 reports no issues across all three modules,PEP-8 conformance,,done
+13,pylint_score.png,Tool output,P5,Pylint rates tan_math.py at 10.00 out of 10,Static analysis score,,done
+14,github_repo.png,Repository,P6,Public repository showing commit history and README,Version control and hosting,,to capture
