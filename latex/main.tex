@@ -281,15 +281,22 @@ counting both signs --- was tested and correctly raised
 \subsection{Conformance to style}
 
 Both modules and the harness pass Flake8 with a 79-column limit and
-report no issues, and \texttt{tan\_math.py} is rated 10.00 out of 10 by
-Pylint. Although style tools are a Deliverable~3 requirement, they were
+report no issues, and all three files are rated 10.00 out of 10 by
+Pylint. Two warnings are suppressed in the source, each with the reason
+recorded alongside it: \texttt{comparison-with-itself} in
+\texttt{tan\_math.py}, since comparing a value to itself is the
+intended way to detect NaN without \texttt{math.isnan}, and
+\texttt{too-many-ancestors} in \texttt{tan\_gui.py}, because
+\texttt{ttk.Frame} already inherits through six classes and any
+subclass of it exceeds the default limit. Although style tools are a Deliverable~3 requirement, they were
 applied here so that later work begins from a clean baseline.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\textwidth]{flake8_clean.png}\\[0.4cm]
 \includegraphics[width=0.85\textwidth]{pylint_score.png}
-\caption{Flake8 reports no issues; Pylint rates the module 10.00/10.}
+\caption{Flake8 reports no issues; Pylint rates all three files
+10.00/10.}
 \end{figure}
 
 \subsection{Use of generative artificial intelligence}
@@ -446,18 +453,52 @@ validated range, error handling, versioning. \\
 
 \subsection{Use of generative artificial intelligence}
 
-\textbf{Tool:} Claude. \quad \textbf{Prompt type:} few-shot ---
-existing commit messages were supplied as examples to be improved.
+\textbf{Tool:} Claude. \quad \textbf{Prompt type:} role prompting
+with source material supplied for review.
 
 \medskip
-\noindent The prompt asked for a README covering purpose, usage
-without an IDE, features and measured accuracy, and for existing
-commit messages to be rewritten in the imperative mood with the
-reason for each change stated. The generated README was adopted after
-the accuracy figures were replaced with measured values, since the
-draft reproduced an earlier and more conservative estimate that
-contradicted the module documentation. Reconciling the two was
-necessary before submission.
+\noindent The prompt asked the tool to act as an open-source
+maintainer reviewing the repository, and supplied the README together
+with the commit history, asking specifically for anything inaccurate,
+missing, or inconsistent with the source, and for any point at which
+the commit message standard slipped.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.72\textwidth]{gai_p6_01_repo_review.png}
+\caption{Prompt supplying the README and commit history for review.}
+\label{fig:p6prompt}
+\end{figure}
+
+\medskip
+\noindent\textbf{Explanation of the output.} The review identified a
+defect that had gone unnoticed: the quick-start instructions still
+directed the reader to run \texttt{python tan\_gui.py} from the
+repository root, although the source files had been moved into
+\texttt{source\_code/}. The documented command therefore failed on a
+fresh clone, even though the verification and style-checking sections
+elsewhere in the same file had been updated correctly. A stale
+reference to ``the two modules'' was also found, dating from before
+the verification harness was written.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.72\textwidth]{gai_p6_02_review_findings.png}
+\caption{Findings of the review, including the broken quick-start
+command.}
+\label{fig:p6findings}
+\end{figure}
+
+\medskip
+\noindent The review further noted that the most recent commit message
+carried no explanatory body, unlike the others, and that the author
+address recorded in the history was a placeholder rather than a
+working one. Both were corrected.
+
+\medskip
+\noindent This is the same pattern that produced the findings in
+Problem~5: the fault was visible only when the documented command was
+actually executed, not when the file was read.
 
 % =====================================================================
 \newpage
@@ -580,8 +621,9 @@ interface required in D1. \\
 \hline
 
 TAN-UI-02 & The interface shall provide a single-line entry field for
-the angle, labelled with visible text. & Priya is not a programmer;
-the purpose of each control must be evident. \\
+the angle, labelled with visible text. & Priya has only brief
+exposure to programming; the purpose of each control must be
+evident. \\
 \hline
 
 TAN-UI-03 & The interface shall provide a mutually exclusive choice
@@ -606,7 +648,9 @@ searching. \\
 
 TAN-UI-07 & The interface shall report every error as a plain
 sentence within the window, and shall never display a stack trace. &
-D1/REQ-003, extended to the graphical interface. \\
+D1/REQ-003, extended to the graphical interface. Priya's goal of
+understanding \emph{why} a result is undefined, not merely that it
+is. \\
 \hline
 
 TAN-UI-08 & The interface shall place keyboard focus in the entry
@@ -642,7 +686,8 @@ rather than assumed. \\
 
 TAN-NFR-04 & The software shall complete a single calculation and
 display the result within one second. & D1/REQ-008, unchanged.
-Priya's deadline-driven context. \\
+Priya cross-checks manual calculations, so repeated queries must
+return promptly. \\
 \hline
 
 TAN-NFR-05 & Every control shall carry a visible text label, shall be

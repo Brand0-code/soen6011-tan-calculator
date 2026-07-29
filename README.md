@@ -19,7 +19,7 @@ installer on Windows and macOS; on Debian or Ubuntu it may need
 
 ```bash
 git clone https://github.com/Brand0-code/soen6011-tan-calculator.git
-cd soen6011-tan-calculator
+cd soen6011-tan-calculator/source_code
 python tan_gui.py
 ```
 
@@ -31,8 +31,8 @@ short self-check:
 python tan_math.py
 ```
 
-All three Python files live in `source_code/` and must stay together,
-since `tan_gui.py` imports from `tan_math.py`.
+Both commands are run from `source_code/`. The three Python files must
+stay together, since `tan_gui.py` imports from `tan_math.py`.
 
 ---
 
@@ -98,13 +98,25 @@ of static-analysis warnings.
 cd source_code
 flake8 --max-line-length=79 tan_math.py tan_gui.py verify_tan.py
 pylint tan_math.py
+pylint tan_gui.py
+pylint verify_tan.py
 ```
 
 | Check | Result |
 |---|---|
 | Flake8, 79-column limit | no issues |
 | Pylint, `tan_math.py` | 10.00 / 10 |
+| Pylint, `tan_gui.py` | 10.00 / 10 |
+| Pylint, `verify_tan.py` | 10.00 / 10 |
 | Verification harness | 44 of 44 checks passed |
+
+Two suppressions are declared in the source, each with the reason
+alongside it. `tan_math.py` disables `comparison-with-itself`, since
+comparing a value to itself is the intended way to detect NaN without
+calling `math.isnan`. `tan_gui.py` disables `too-many-ancestors`,
+because `ttk.Frame` already inherits through six classes and any
+subclass of it exceeds the default limit; the depth belongs to Tkinter
+rather than to this code.
 
 Lint the modules individually. Running Pylint over `tan_math.py` and
 `verify_tan.py` together reports `R0801` (similar lines), because both
@@ -186,7 +198,8 @@ screenshots/      interface states and tool output
 README.md
 ```
 
-The two modules are kept apart so that the mathematics can be tested
+The calculation and interface modules are kept apart so that the
+mathematics can be tested
 without a window on screen.
 
 ---

@@ -11,5 +11,7 @@ figure,filename,category,problem,caption,evidences,prompt_type,status
 10,verification_output_1.png,Tool output,P5,Verification harness output part 1 of 2,Reference angles degrees periodicity and near-asymptote checks,,done
 11,verification_output_2.png,Tool output,P5,Verification harness output part 2 of 2: 44 of 44 checks passed,Undefined points rejected input and boundary checks,,done
 12,flake8_clean.png,Tool output,P5,Flake8 reports no issues across all three modules,PEP-8 conformance,,done
-13,pylint_score.png,Tool output,P5,Pylint rates tan_math.py at 10.00 out of 10,Static analysis score,,done
-14,github_repo.png,Repository,P6,Public repository showing commit history and README,Version control and hosting,,to capture
+13,pylint_score.png,Tool output,P5,Pylint rates all three modules at 10.00 out of 10,Static analysis score,,done
+14,gai_p6_01_repo_review.png,GAI,P6,Prompt supplying the README and commit history for review,Review of documentation against source,Role prompting with source material supplied,done
+15,gai_p6_02_review_findings.png,GAI,P6,Findings of the review including the broken quick-start command,Defect found in documentation by review,Role prompting with source material supplied,done
+16,github_repo.png,Repository,P6,Public repository showing commit history and README,Version control and hosting,,to capture

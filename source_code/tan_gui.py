@@ -48,6 +48,10 @@ NON_NUMERIC_MESSAGE = (
 
 
 class TangentCalculatorApp(ttk.Frame):
+    # pylint: disable=too-many-ancestors
+    # ttk.Frame already inherits through Widget, BaseWidget, Misc, Pack,
+    # Place and Grid, so any subclass of it exceeds the default limit of
+    # seven ancestors. The depth belongs to Tkinter, not to this class.
     """The main application window.
 
     The frame owns every widget, holds the two variables bound to the
