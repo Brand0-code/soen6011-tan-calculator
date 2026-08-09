@@ -44,7 +44,8 @@ DEGREES = "degrees"
 #: luminance below 0.15, passing on dark requires above 0.32, and those
 #: ranges do not overlap. The pair is therefore selected at run time
 #: from the luminance of the theme background. Measured ratios are
-#: 6.9:1 and 7.1:1 on light, 7.6:1 and 6.5:1 on dark.
+#: 6.9:1 and 7.1:1 on light, 7.6:1 and 6.5:1 on dark, reproducible
+#: with check_contrast.py in this directory.
 LIGHT_THEME_COLOURS = {
     "success": "#0a5c1f",
     "error": "#a00018",
