@@ -15,3 +15,5 @@ figure,filename,category,problem,caption,evidences,prompt_type,status
 14,gai_p6_01_repo_review.png,GAI,P6,Prompt supplying the README and commit history for review,Review of documentation against source,Role prompting with source material supplied,done
 15,gai_p6_02_review_findings.png,GAI,P6,Findings of the review including the broken quick-start command,Defect found in documentation by review,Role prompting with source material supplied,done
 16,github_repo.png,Repository,P6,Public repository showing commit history and README,Version control and hosting,,to capture
+17,pdb_01_range_reduction.png,Tool output,D3-P7,Debugger session confirming range reduction of x=1000 to 0.9735,Debugger usage,,done
+18,pdb_02_series_terms.png,Tool output,D3-P7,Debugger session showing series terms falling toward the tolerance,Debugger usage,,done

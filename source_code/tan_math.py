@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from typing import Union
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __all__ = [
     "PI",
     "HALF_PI",
@@ -310,6 +310,13 @@ def _self_check() -> None:
     print(f"tan(x) from-scratch module, version {__version__}")
     print("-" * 60)
 
+    # pylint: disable=duplicate-code
+    # This sample list intentionally overlaps with verify_tan.py's list
+    # of reference angles: both exist to exercise the same well-known
+    # values, one as a quick manual demo and the other as an automated
+    # check against math.tan. Sharing the source list would make the
+    # verification harness depend on the module it is meant to check
+    # independently, so the short overlap is kept rather than removed.
     samples = (
         ("0", 0.0),
         ("pi/6", PI / 6.0),
