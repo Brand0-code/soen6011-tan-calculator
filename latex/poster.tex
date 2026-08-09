@@ -138,8 +138,8 @@
 \end{block}
 
 \begin{block}{Unit Testing (PyUnit)}
-  \textbf{55 tests} across ten classes, each traced to a requirement
-  from Deliverable~2. Six of the ten:
+  \textbf{58 tests} across eleven classes, each traced to a
+  requirement from Deliverable~2. Six of the eleven:
   \vspace{0.3cm}
 
   \centering
@@ -158,15 +158,16 @@
   \vspace{0.4cm}
 
   \raggedright
-  \textbf{Validated by mutation.} Twenty defects were injected into the
-  implementation; the suite detected seventeen. Of the three survivors,
-  all were behaviour-preserving.
+  \textbf{Validated by mutation.} Sixteen defects were injected. The
+  first version of the suite detected \textbf{seven}; the revised
+  version detects \textbf{fourteen}. Both survivors are
+  behaviour-preserving.
   \vspace{0.2cm}
 
-  Two earlier survivors revealed genuine weaknesses --- an unreachable
-  validation branch masked by a later guard, and a magnitude boundary
-  asserted relative to the constant it was meant to pin. Both are now
-  covered.
+  The nine original survivors shared one cause: every tuning constant
+  was asserted only relative to itself. Loosening the series tolerance
+  degraded accuracy by four orders of magnitude and nothing failed.
+  The constants are now pinned to their documented values.
 \end{block}
 
 \begin{block}{Quality Tooling}
@@ -177,8 +178,8 @@
   \begin{tabular}{lr}
     \toprule
     Flake8, 79-column limit & no issues \\
-    Pylint, all three modules & 10.00 / 10 \\
-    Unit tests & 55 of 55 \\
+    Pylint, all five modules, one combined run & 10.00 / 10 \\
+    Unit tests & 58 of 58 \\
     Verification harness & 44 of 44 \\
     \bottomrule
   \end{tabular}
@@ -255,8 +256,11 @@
     \item Focus begins in the entry field and is visibly indicated
     \item \textbf{Every outcome is stated in words as well as
           colour}, so nothing depends on colour perception
-    \item Contrast measured at 6.9:1 and 7.1:1 against the 4.5:1
-          requirement
+    \item \textbf{Contrast measured on both themes.} No single colour
+          can meet 4.5:1 against a light and a dark background --- the
+          required luminance ranges do not overlap --- so the palette
+          is selected at run time from the theme background. Ratios
+          are 5.8--7.1:1 on light and 5.7--7.0:1 on dark
     \item Text wraps rather than clipping; system font settings apply
   \end{itemize}
   \vspace{0.3cm}
@@ -286,10 +290,11 @@
   debugger session design.
   \vspace{0.25cm}
 
-  The test review found three real weaknesses --- a vacuous assertion,
-  an unreachable branch, and a boundary asserted relative to the
-  constant it was meant to pin. All are now covered. Prompts and
-  responses are in \texttt{screenshots/}.
+  Two reviews changed the code. The accessibility audit measured the
+  colours against a dark theme and found all three below 2:1; the
+  palette is now chosen at run time. The test review found nine
+  mutations surviving; the suite now catches fourteen of sixteen.
+  Prompts and responses are in \texttt{screenshots/}.
 \end{block}
 
 \begin{block}{Repository}
@@ -298,7 +303,7 @@
   {\small\texttt{soen6011-tan-calculator}}
   \vspace{0.15cm}
 
-  {\small Version \texttt{v1.0.0} --- Semantic Versioning}
+  {\small Version \texttt{v1.1.0} --- Semantic Versioning}
 \end{block}
 
 \end{column}

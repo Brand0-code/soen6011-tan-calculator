@@ -164,7 +164,7 @@ class TangentCalculatorApp(ttk.Frame):
         heading = ttk.Label(
             self,
             text="Tangent Calculator",
-            font=("TkDefaultFont", 0, "bold"),
+            font=("TkDefaultFont", 15, "bold"),
         )
         heading.grid(column=0, row=0, sticky="w")
 

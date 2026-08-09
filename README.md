@@ -7,7 +7,7 @@ part of the calculation.
 
 **Course:** SOEN 6011 — Software Engineering Processes, Summer 2026
 **Function:** F2 — tan(x)
-**Version:** 1.0.0
+**Version:** 1.1.0
 
 ---
 
@@ -96,32 +96,29 @@ of static-analysis warnings.
 
 ```bash
 cd source_code
-flake8 --max-line-length=79 tan_math.py tan_gui.py verify_tan.py
-pylint tan_math.py
-pylint tan_gui.py
-pylint verify_tan.py
+flake8 --max-line-length=79 tan_math.py tan_gui.py verify_tan.py \
+    test_tan_math.py pdb_demo.py
+pylint tan_math.py tan_gui.py verify_tan.py test_tan_math.py pdb_demo.py
 ```
 
 | Check | Result |
 |---|---|
-| Flake8, 79-column limit | no issues |
-| Pylint, `tan_math.py` | 10.00 / 10 |
-| Pylint, `tan_gui.py` | 10.00 / 10 |
-| Pylint, `verify_tan.py` | 10.00 / 10 |
+| Flake8, 79-column limit, all five modules | no issues |
+| Pylint, all five modules, single combined run | 10.00 / 10 |
+| Unit tests | 58 of 58 passed |
 | Verification harness | 44 of 44 checks passed |
 
-Two suppressions are declared in the source, each with the reason
+Three suppressions are declared in the source, each with the reason
 alongside it. `tan_math.py` disables `comparison-with-itself`, since
 comparing a value to itself is the intended way to detect NaN without
 calling `math.isnan`. `tan_gui.py` disables `too-many-ancestors`,
 because `ttk.Frame` already inherits through six classes and any
 subclass of it exceeds the default limit; the depth belongs to Tkinter
-rather than to this code.
-
-Lint the modules individually. Running Pylint over `tan_math.py` and
-`verify_tan.py` together reports `R0801` (similar lines), because both
-list the same sample angles; that is an artefact of comparing the two
-files, not a defect in either.
+rather than to this code. `tan_math.py` also disables `duplicate-code`
+around its self-check sample list, which coincidentally overlaps with
+`verify_tan.py`'s list of reference angles; keeping the harness
+independent of the module it checks matters more than removing the
+short overlap.
 
 ---
 
@@ -184,15 +181,18 @@ reporting a fault code.
 
 ```
 source_code/
-  tan_math.py     calculation only, no interface code
-  tan_gui.py      Tkinter interface, no calculation code
-  verify_tan.py   verification harness, not part of the implementation
+  tan_math.py       calculation only, no interface code
+  tan_gui.py        Tkinter interface, no calculation code
+  verify_tan.py     verification harness, not part of the implementation
+  test_tan_math.py  PyUnit suite (58 tests)
+  pdb_demo.py       small driver used for the debugger walkthrough
 latex/
-  main.tex        Deliverable 2 report
-  slides.tex      presentation slides
+  main.tex          Deliverable 2 report
+  slides.tex        Deliverable 2 presentation slides
+  poster.tex        Deliverable 3 A0 digital poster
+  mindmap.tex       Deliverable 3 UI design principles mind map
 pdf/
-  main.pdf        compiled report
-  slides.pdf      compiled slides
+  main.pdf, slides.pdf, poster.pdf, mindmap.pdf   compiled outputs
 screenshots/      interface states and tool output
 .gitignore
 README.md
@@ -206,8 +206,10 @@ without a window on screen.
 
 ## Versioning
 
-Semantic Versioning (`MAJOR.MINOR.PATCH`). The current release is
-**v1.0.0**, tagged in this repository.
+Semantic Versioning (`MAJOR.MINOR.PATCH`). `v1.0.0` was the Deliverable 2
+release. Deliverable 3 adds backward-compatible functionality only —
+accessibility support in the GUI, a PyUnit suite, and a debugger demo —
+so it is tagged **v1.1.0**, a minor version bump.
 
 ---
 
